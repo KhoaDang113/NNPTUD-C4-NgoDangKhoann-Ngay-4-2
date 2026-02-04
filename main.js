@@ -422,3 +422,70 @@ async function saveProduct() {
         alert('Error updating product. Please try again.');
     }
 }
+
+// Create modal instance
+let createModal = null;
+
+// Open create modal
+function openCreateModal() {
+    // Reset form
+    document.getElementById('createForm').reset();
+    document.getElementById('createCategoryId').value = 1;
+    
+    // Show modal
+    if (!createModal) {
+        createModal = new bootstrap.Modal(document.getElementById('createModal'));
+    }
+    createModal.show();
+}
+
+// Create product via POST API
+async function createProduct() {
+    const title = document.getElementById('createTitle').value.trim();
+    const price = document.getElementById('createPrice').value;
+    const description = document.getElementById('createDescription').value.trim();
+    const categoryId = document.getElementById('createCategoryId').value;
+    const images = document.getElementById('createImages').value.trim();
+    
+    // Validate required fields
+    if (!title || !price || !categoryId) {
+        alert('Please fill in all required fields (Title, Price, Category ID)');
+        return;
+    }
+    
+    const newProduct = {
+        title: title,
+        price: parseFloat(price),
+        description: description || 'No description',
+        categoryId: parseInt(categoryId),
+        images: [images || 'https://via.placeholder.com/250']
+    };
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newProduct)
+        });
+        
+        if (!response.ok) throw new Error('Failed to create product');
+        
+        const result = await response.json();
+        
+        // Add to local data
+        allProducts.unshift(result);
+        filteredProducts.unshift(result);
+        
+        // Refresh table and close modal
+        currentPage = 1;
+        renderTable();
+        createModal.hide();
+        
+        alert('Product created successfully!');
+    } catch (error) {
+        console.error('Error creating product:', error);
+        alert('Error creating product. Please try again.');
+    }
+}
