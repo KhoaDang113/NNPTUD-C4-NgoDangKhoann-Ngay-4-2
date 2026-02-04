@@ -1,0 +1,62 @@
+// API URL - using Platzi Fake Store API
+const API_URL = 'https://api.escuelajs.co/api/v1/products';
+
+// Store all products
+let allProducts = [];
+
+// Fetch and display products when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    fetchProducts();
+});
+
+// Fetch products from API
+async function fetchProducts() {
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        allProducts = data;
+        renderTable(allProducts);
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        document.getElementById('tableBody').innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-danger">
+                    <i class="bi bi-exclamation-triangle"></i> Error loading data. Make sure json-server is running.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Render table with products
+function renderTable(products) {
+    const tableBody = document.getElementById('tableBody');
+    
+    if (products.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">No products found</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tableBody.innerHTML = products.map(product => `
+        <tr>
+            <td><strong>#${product.id}</strong></td>
+            <td>${product.title}</td>
+            <td><span class="text-success fw-bold">$${product.price}</span></td>
+            <td>
+                <span class="category-badge">
+                    ${product.category?.name || 'N/A'}
+                </span>
+            </td>
+            <td>
+                <img src="${product.images?.[0] || 'https://via.placeholder.com/60'}" 
+                     alt="${product.title}" 
+                     class="product-image"
+                     onerror="this.src='https://via.placeholder.com/60?text=No+Image'">
+            </td>
+        </tr>
+    `).join('');
+}
