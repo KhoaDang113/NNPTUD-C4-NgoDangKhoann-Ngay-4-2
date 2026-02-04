@@ -64,7 +64,8 @@ function renderTable() {
         <tr data-bs-toggle="tooltip" 
             data-bs-placement="top" 
             data-bs-title="${escapeHtml(product.description || 'No description available')}"
-            style="cursor: pointer;">
+            style="cursor: pointer;"
+            onclick="openDetailModal(${product.id})">
             <td><strong>#${product.id}</strong></td>
             <td>${product.title}</td>
             <td><span class="text-success fw-bold">$${product.price}</span></td>
@@ -306,4 +307,118 @@ function exportToCSV() {
     document.body.removeChild(link);
     
     URL.revokeObjectURL(url);
+}
+
+// Current product being viewed/edited
+let currentProduct = null;
+let detailModal = null;
+
+// Open detail modal
+function openDetailModal(productId) {
+    currentProduct = allProducts.find(p => p.id === productId);
+    if (!currentProduct) return;
+    
+    // Populate view mode
+    document.getElementById('detailId').textContent = currentProduct.id;
+    document.getElementById('detailTitle').textContent = currentProduct.title;
+    document.getElementById('detailPrice').textContent = '$' + currentProduct.price;
+    document.getElementById('detailCategory').textContent = currentProduct.category?.name || 'N/A';
+    document.getElementById('detailDescription').textContent = currentProduct.description || 'No description';
+    document.getElementById('detailImage').src = currentProduct.images?.[0] || 'https://via.placeholder.com/250';
+    document.getElementById('detailImage').onerror = function() {
+        this.src = 'https://via.placeholder.com/250?text=No+Image';
+    };
+    
+    // Populate edit form
+    document.getElementById('editId').value = currentProduct.id;
+    document.getElementById('editTitle').value = currentProduct.title;
+    document.getElementById('editPrice').value = currentProduct.price;
+    document.getElementById('editDescription').value = currentProduct.description || '';
+    document.getElementById('editImages').value = currentProduct.images?.[0] || '';
+    
+    // Reset to view mode
+    document.getElementById('viewMode').style.display = 'block';
+    document.getElementById('editMode').style.display = 'none';
+    document.getElementById('editBtn').style.display = 'inline-block';
+    document.getElementById('saveBtn').style.display = 'none';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+    
+    // Show modal
+    if (!detailModal) {
+        detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+    }
+    detailModal.show();
+}
+
+// Toggle between view and edit mode
+function toggleEditMode() {
+    const viewMode = document.getElementById('viewMode');
+    const editMode = document.getElementById('editMode');
+    const editBtn = document.getElementById('editBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    
+    const isEditing = editMode.style.display === 'block';
+    
+    if (isEditing) {
+        // Switch to view mode
+        viewMode.style.display = 'block';
+        editMode.style.display = 'none';
+        editBtn.style.display = 'inline-block';
+        saveBtn.style.display = 'none';
+        cancelEditBtn.style.display = 'none';
+    } else {
+        // Switch to edit mode
+        viewMode.style.display = 'none';
+        editMode.style.display = 'block';
+        editBtn.style.display = 'none';
+        saveBtn.style.display = 'inline-block';
+        cancelEditBtn.style.display = 'inline-block';
+    }
+}
+
+// Save product via PUT API
+async function saveProduct() {
+    const productId = document.getElementById('editId').value;
+    const updatedProduct = {
+        title: document.getElementById('editTitle').value,
+        price: parseFloat(document.getElementById('editPrice').value),
+        description: document.getElementById('editDescription').value,
+        images: [document.getElementById('editImages').value || 'https://via.placeholder.com/250']
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedProduct)
+        });
+        
+        if (!response.ok) throw new Error('Failed to update product');
+        
+        const result = await response.json();
+        
+        // Update local data
+        const index = allProducts.findIndex(p => p.id == productId);
+        if (index !== -1) {
+            allProducts[index] = { ...allProducts[index], ...result };
+        }
+        
+        // Update filtered products too
+        const filteredIndex = filteredProducts.findIndex(p => p.id == productId);
+        if (filteredIndex !== -1) {
+            filteredProducts[filteredIndex] = { ...filteredProducts[filteredIndex], ...result };
+        }
+        
+        // Refresh table and close modal
+        renderTable();
+        detailModal.hide();
+        
+        alert('Product updated successfully!');
+    } catch (error) {
+        console.error('Error updating product:', error);
+        alert('Error updating product. Please try again.');
+    }
 }
