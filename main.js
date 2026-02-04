@@ -266,3 +266,44 @@ function updateSortIcons() {
         priceIcon.className = `bi sort-icon active bi-sort-numeric-${sortDirection === 'asc' ? 'down' : 'up'}`;
     }
 }
+
+// Export current view data to CSV
+function exportToCSV() {
+    if (filteredProducts.length === 0) {
+        alert('No data to export!');
+        return;
+    }
+    
+    // CSV headers
+    const headers = ['ID', 'Title', 'Price', 'Description', 'Category', 'Images'];
+    
+    // Convert data to CSV rows
+    const rows = filteredProducts.map(product => {
+        return [
+            product.id,
+            `"${(product.title || '').replace(/"/g, '""')}"`,
+            product.price,
+            `"${(product.description || '').replace(/"/g, '""')}"`,
+            `"${product.category?.name || 'N/A'}"`,
+            `"${(product.images || []).join('; ')}"`
+        ].join(',');
+    });
+    
+    // Combine headers and rows
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    
+    // Create blob and download link
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `products_export_${new Date().toISOString().slice(0,10)}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    URL.revokeObjectURL(url);
+}

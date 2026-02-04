@@ -79,15 +79,20 @@
                                oninput="handleSearch(this.value)">
                     </div>
                 </div>
-                <div class="col-md-3 ms-auto">
-                    <div class="d-flex align-items-center justify-content-end">
-                        <label class="me-2 text-muted">Show:</label>
-                        <select class="form-select form-select-sm" style="width: auto;" id="itemsPerPage" onchange="changeItemsPerPage(this.value)">
-                            <option value="5">5</option>
-                            <option value="10" selected>10</option>
-                            <option value="20">20</option>
-                        </select>
-                        <span class="ms-2 text-muted">items</span>
+                <div class="col-md-5 ms-auto">
+                    <div class="d-flex align-items-center justify-content-end gap-3">
+                        <button class="btn btn-success btn-sm" onclick="exportToCSV()">
+                            <i class="bi bi-download"></i> Export CSV
+                        </button>
+                        <div class="d-flex align-items-center">
+                            <label class="me-2 text-muted">Show:</label>
+                            <select class="form-select form-select-sm" style="width: auto;" id="itemsPerPage" onchange="changeItemsPerPage(this.value)">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                            </select>
+                            <span class="ms-2 text-muted">items</span>
+                        </div>
                     </div>
                 </div>
             </div>
