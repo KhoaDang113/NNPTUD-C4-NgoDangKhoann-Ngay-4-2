@@ -94,3 +94,19 @@ function initTooltips() {
         });
     });
 }
+
+// Handle search input - realtime filtering
+function handleSearch(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    
+    if (term === '') {
+        renderTable(allProducts);
+        return;
+    }
+    
+    const filteredProducts = allProducts.filter(product => 
+        product.title.toLowerCase().includes(term)
+    );
+    
+    renderTable(filteredProducts);
+}
