@@ -445,7 +445,7 @@ async function createProduct() {
     const price = document.getElementById('createPrice').value;
     const description = document.getElementById('createDescription').value.trim();
     const categoryId = document.getElementById('createCategoryId').value;
-    const images = document.getElementById('createImages').value.trim();
+    const imageUrl = document.getElementById('createImages').value.trim();
     
     // Validate required fields
     if (!title || !price || !categoryId) {
@@ -453,13 +453,24 @@ async function createProduct() {
         return;
     }
     
+    // Validate image URL - must be http/https URL, not base64
+    let validImageUrl = 'https://placeimg.com/640/480/any';
+    if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+        validImageUrl = imageUrl;
+    } else if (imageUrl && imageUrl.startsWith('data:')) {
+        alert('Base64 images are not supported. Please use a valid image URL (https://...)');
+        return;
+    }
+    
     const newProduct = {
         title: title,
         price: parseFloat(price),
-        description: description || 'No description',
+        description: description || 'A new product',
         categoryId: parseInt(categoryId),
-        images: [images || 'https://via.placeholder.com/250']
+        images: [validImageUrl]
     };
+    
+    console.log('Creating product:', newProduct);
     
     try {
         const response = await fetch(API_URL, {
@@ -470,9 +481,16 @@ async function createProduct() {
             body: JSON.stringify(newProduct)
         });
         
-        if (!response.ok) throw new Error('Failed to create product');
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('API Error:', errorData);
+            throw new Error('Failed to create product');
+        }
         
         const result = await response.json();
+        console.log('Created product:', result);
         
         // Add to local data
         allProducts.unshift(result);
@@ -486,6 +504,6 @@ async function createProduct() {
         alert('Product created successfully!');
     } catch (error) {
         console.error('Error creating product:', error);
-        alert('Error creating product. Please try again.');
+        alert('Error creating product. Please check the console for details.');
     }
 }
