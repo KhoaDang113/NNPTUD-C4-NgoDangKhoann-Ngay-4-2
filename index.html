@@ -51,8 +51,8 @@
         </h1>
         
         <div class="table-container">
-            <!-- Search Box -->
-            <div class="row mb-3">
+            <!-- Search Box and Items Per Page -->
+            <div class="row mb-3 align-items-center">
                 <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text bg-white">
@@ -63,6 +63,17 @@
                                id="searchInput" 
                                placeholder="Search by title..."
                                oninput="handleSearch(this.value)">
+                    </div>
+                </div>
+                <div class="col-md-3 ms-auto">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <label class="me-2 text-muted">Show:</label>
+                        <select class="form-select form-select-sm" style="width: auto;" id="itemsPerPage" onchange="changeItemsPerPage(this.value)">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                        </select>
+                        <span class="ms-2 text-muted">items</span>
                     </div>
                 </div>
             </div>
@@ -81,6 +92,18 @@
                         <!-- Data will be loaded here -->
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="text-muted" id="paginationInfo">
+                    Showing 0 to 0 of 0 items
+                </div>
+                <nav>
+                    <ul class="pagination mb-0" id="paginationControls">
+                        <!-- Pagination buttons will be generated here -->
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
