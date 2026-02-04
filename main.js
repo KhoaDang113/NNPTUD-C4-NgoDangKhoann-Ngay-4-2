@@ -9,6 +9,10 @@ let filteredProducts = [];
 let currentPage = 1;
 let itemsPerPage = 10;
 
+// Sorting state
+let sortColumn = null; // 'title' or 'price'
+let sortDirection = 'asc'; // 'asc' or 'desc'
+
 // Fetch and display products when page loads
 document.addEventListener('DOMContentLoaded', function() {
     fetchProducts();
@@ -212,4 +216,53 @@ function handleSearch(searchTerm) {
     
     currentPage = 1; // Reset to first page when searching
     renderTable();
+}
+
+// Handle sorting
+function handleSort(column) {
+    // Toggle direction if same column, otherwise reset to ascending
+    if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+    }
+    
+    // Sort filtered products
+    filteredProducts.sort((a, b) => {
+        let valueA, valueB;
+        
+        if (column === 'title') {
+            valueA = a.title.toLowerCase();
+            valueB = b.title.toLowerCase();
+        } else if (column === 'price') {
+            valueA = a.price;
+            valueB = b.price;
+        }
+        
+        if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+        if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    currentPage = 1; // Reset to first page when sorting
+    updateSortIcons();
+    renderTable();
+}
+
+// Update sort icons in table headers
+function updateSortIcons() {
+    // Reset all icons
+    const titleIcon = document.getElementById('sort-title-icon');
+    const priceIcon = document.getElementById('sort-price-icon');
+    
+    titleIcon.className = 'bi sort-icon';
+    priceIcon.className = 'bi sort-icon';
+    
+    // Set active icon
+    if (sortColumn === 'title') {
+        titleIcon.className = `bi sort-icon active bi-sort-alpha-${sortDirection === 'asc' ? 'down' : 'up'}`;
+    } else if (sortColumn === 'price') {
+        priceIcon.className = `bi sort-icon active bi-sort-numeric-${sortDirection === 'asc' ? 'down' : 'up'}`;
+    }
 }
