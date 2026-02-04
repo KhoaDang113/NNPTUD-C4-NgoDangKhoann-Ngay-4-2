@@ -42,7 +42,10 @@ function renderTable(products) {
     }
 
     tableBody.innerHTML = products.map(product => `
-        <tr>
+        <tr data-bs-toggle="tooltip" 
+            data-bs-placement="top" 
+            data-bs-title="${escapeHtml(product.description || 'No description available')}"
+            style="cursor: pointer;">
             <td><strong>#${product.id}</strong></td>
             <td>${product.title}</td>
             <td><span class="text-success fw-bold">$${product.price}</span></td>
@@ -59,4 +62,35 @@ function renderTable(products) {
             </td>
         </tr>
     `).join('');
+    
+    // Initialize Bootstrap tooltips
+    initTooltips();
+}
+
+// Escape HTML to prevent XSS in tooltips
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/"/g, '&quot;');
+}
+
+// Initialize Bootstrap tooltips
+function initTooltips() {
+    // Dispose existing tooltips first
+    const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    existingTooltips.forEach(el => {
+        const tooltip = bootstrap.Tooltip.getInstance(el);
+        if (tooltip) {
+            tooltip.dispose();
+        }
+    });
+    
+    // Initialize new tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => {
+        new bootstrap.Tooltip(el, {
+            container: 'body',
+            html: false
+        });
+    });
 }
